@@ -9,9 +9,8 @@ import (
 	"github.com/Nyxoy/restAPI/models"
 	"github.com/Nyxoy/restAPI/utils"
 	"github.com/gorilla/mux"
+	"github.com/spf13/viper"
 )
-
-const BaseURL = "https://nuygtluoyxyeboiduiuo.supabase.co/rest/v1"
 
 type Handler struct {
 }
@@ -38,8 +37,8 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	// Check if the user already exists in the database
 	db := db.CreateRestyClient()
 	resp, err := db.R().
-		SetQueryParam("email", "eq."+user.Email). // Set the query parameter for email
-		Get(BaseURL + "/users")                   // Correctly access the BaseURL constant from db package
+		SetQueryParam("email", "eq."+user.Email).      // Set the query parameter for email
+		Get(viper.GetString("DB_BASE_URL") + "/users") // Correctly access the BaseURL constant from db package
 
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
