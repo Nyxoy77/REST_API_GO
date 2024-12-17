@@ -16,5 +16,4 @@ func LoadConfig() {
 		log.Fatalln("There was an error loading the env file : ", err)
 	}
 	viper.SetDefault("SERVER_PORT", ":8080")
-
 }
