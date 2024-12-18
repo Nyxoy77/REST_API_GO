@@ -12,7 +12,7 @@ func main() {
 	config.LoadConfig()
 	server := api.NewAPIServer(viper.GetString("SERVER_PORT"))
 	if error := server.Run(); error != nil {
-		log.Fatal("An error occured at the time of  initialisation")
+		log.Fatalf("An error occured at the time of  initialisation %s", error)
 	}
 
 }
