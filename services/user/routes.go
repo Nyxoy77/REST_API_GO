@@ -2,7 +2,7 @@ package user
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/Nyxoy/restAPI/db"
@@ -31,33 +31,45 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	//Get The JSON payload
 	var user models.User
 	if err := utils.ParseJSON(r, &user, w); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
 	}
-	// fmt.Println(user)
-	// Check if the user already exists in the database
+
 	db := db.CreateRestyClient()
+	ctx := r.Context()
 	resp, err := db.R().
+		SetContext(ctx).
 		SetQueryParam("email", "eq."+user.Email).      // Set the query parameter for email
 		Get(viper.GetString("DB_BASE_URL") + "/users") // Correctly access the BaseURL constant from db package
 
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, http.StatusBadRequest, "Internal Server error")
 	}
 
-	fmt.Println(string(resp.Body()))
-	// fmt.Println(resp.StatusCode())
 	if resp.StatusCode() == 200 {
 		var users []models.User
 		if err := json.Unmarshal(resp.Body(), &users); err != nil {
-			utils.WriteError(w, http.StatusInternalServerError, err)
+			utils.WriteError(w, http.StatusBadRequest, "Wrong data fetched")
 			return
 		}
 
 		if len(users) > 0 {
-
-			fmt.Println("The user is already registered. Please Login")
+			utils.WriteError(w, http.StatusConflict, "The user already exists!")
 			return
 		}
+	}
+	data := map[string]interface{}{
+		"name":     user.Name,
+		"email":    user.Email,
+		"password": user.Password,
+	}
+	resp1, err1 := db.R().SetBody(data).Post(viper.GetString("DB_BASE_URL") + "/users")
+	if err1 != nil {
+		http.Error(w, "Failed to register the user", http.StatusInternalServerError)
+		log.Println("Failed to register the user ")
+		return
+	}
+	if resp1.StatusCode() >= 200 && resp1.StatusCode() < 300 {
+		utils.WriteError(w, resp1.StatusCode(), "The user is registered successfully")
 	}
 
 }
