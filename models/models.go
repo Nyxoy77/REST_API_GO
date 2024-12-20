@@ -22,3 +22,18 @@ type Login struct {
 	Email    string `json:"email" validate:"email,required"`
 	Password string `json:"password" validate:"required"`
 }
+
+type Forgot struct {
+	Email string `json:"email"`
+}
+
+type Reset struct {
+	User_ID     int8   `json:"user_id"`
+	Expire_Time string `json:"expiration"`
+	Reset_token string `json:"reset_token"`
+	Used        bool   `json:"used"`
+}
+
+type UpdatePass struct {
+	Password string `json:"password" validate:"required,min=6"`
+}
