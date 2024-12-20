@@ -4,13 +4,22 @@ go 1.22.4
 
 require (
 	github.com/alexedwards/argon2id v1.0.0
+	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-resty/resty/v2 v2.16.2
 	github.com/gorilla/mux v1.8.1
 	github.com/spf13/viper v1.19.0
 )
 
 require (
+	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/leodido/go-urn v1.4.0 // indirect
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
+)
+
+require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect

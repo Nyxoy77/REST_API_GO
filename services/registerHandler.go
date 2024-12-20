@@ -1,71 +1,34 @@
-package user
+package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/Nyxoy/restAPI/db"
 	"github.com/Nyxoy/restAPI/models"
 	"github.com/Nyxoy/restAPI/utils"
-	"github.com/gorilla/mux"
+	"github.com/go-playground/validator"
 	"github.com/spf13/viper"
 )
 
-type Handler struct {
-}
-
-func NewHandler() *Handler {
-	return &Handler{}
-}
-
-func (h *Handler) RegisterRoutes(r *mux.Router) {
-	r.HandleFunc("/login", h.handleLogin).Methods("POST")
-	r.HandleFunc("/register", h.handleRegister).Methods("POST")
-}
-
-func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var user models.Login
-	if err := utils.ParseJSON(r, &user, w); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, "Error retrieving the data")
-	}
-	fmt.Println(user)
-	db := db.CreateRestyClient()
-	resp, err := db.R().SetQueryParam("email", "eq."+user.Email).Get(viper.GetString("DB_BASE_URL") + "/rest/v1/users")
-	if err != nil {
-		log.Printf("An error occured at the time of logging %s", err)
-		http.Error(w, fmt.Sprintf("An error occurred at the time of logging: %s", err), http.StatusInternalServerError)
-		return
-	}
-	var respUser []models.User
-	err1 := json.Unmarshal(resp.Body(), &respUser)
-	if err1 != nil {
-		log.Println("An error occured at the time of parsing the data")
-		http.Error(w, "An error occured at the time of parsing the data for logging", http.StatusInternalServerError)
-		return
-	}
-	var actUser = respUser[0]
-	fmt.Println(actUser.Password, " ", user.Password)
-	matches := utils.CheckHashPass(user.Password, actUser.Password)
-	fmt.Println(matches)
-
-	if matches {
-		utils.WriteError(w, http.StatusFound, "The user successfully logged in")
-	} else {
-		utils.WriteError(w, http.StatusFound, "The user successfully not logged in")
-	}
-}
-
-func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
+func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	//Get The JSON payload
 	var user models.User
 	if err := utils.ParseJSON(r, &user, w); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
-
+	validate := utils.NewValidator()
+	if err := validate.Struct(user); err != nil {
+		//Gather the error data
+		errors := err.(validator.ValidationErrors)
+		for _, value := range errors {
+			log.Printf("Validation failed for field %s , conditon %s /n", value.Field(), value.Tag())
+		}
+		utils.WriteError(w, http.StatusBadRequest, "Invalid Input Fields")
+		return
+	}
 	db := db.CreateRestyClient()
 	ctx := r.Context()
 	resp, err := db.R().
@@ -97,6 +60,7 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		"email":     user.Email,
 		"password":  hashedPass,
 		"phone":     user.Phone,
+		"user_type": user.UserType,
 	}
 	resp1, err1 := db.R().SetBody(data).Post(viper.GetString("DB_BASE_URL") + "/rest/v1/users")
 	if err1 != nil {

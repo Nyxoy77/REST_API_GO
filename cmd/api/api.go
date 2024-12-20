@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Nyxoy/restAPI/services/user"
+	"github.com/Nyxoy/restAPI/services"
 	"github.com/gorilla/mux"
 )
 
@@ -21,8 +21,10 @@ func NewAPIServer(addr string) *APIServer {
 func (s *APIServer) Run() error {
 	router := mux.NewRouter()
 	subrouter := router.PathPrefix("/api/v1").Subrouter()
-	userHandler := user.NewHandler()
+	userHandler := services.NewHandler()
 	userHandler.RegisterRoutes(subrouter)
+	protectedSubRouter := router.PathPrefix("/api/v1/protected").Subrouter()
+	userHandler.RegisterProtectedRoutes(protectedSubRouter)
 	log.Println("Listening on ", s.addr)
 	return http.ListenAndServe(s.addr, router)
 }
