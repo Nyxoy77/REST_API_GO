@@ -25,6 +25,8 @@ func HandlePassUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(token)
+	fmt.Println(passBody)
+
 	if token == "" {
 		utils.WriteError(w, http.StatusBadRequest, "Missing token in the string")
 		return
@@ -59,7 +61,9 @@ func HandlePassUpdate(w http.ResponseWriter, r *http.Request) {
 			utils.WriteError(w, http.StatusBadRequest, "The token has expired")
 			return
 		}
+		fmt.Println(actUser.Used)
 		if (!actUser.Used) && (actUser.Reset_token == token) {
+			fmt.Println("Token matched")
 			hashedPass, err := utils.Encrypt(passBody.Password)
 			if err != nil {
 				log.Println("An error occured during hashing ")
@@ -68,16 +72,30 @@ func HandlePassUpdate(w http.ResponseWriter, r *http.Request) {
 			data := map[string]interface{}{
 				"password": hashedPass,
 			}
-			response, err1 := db.R().SetBody(data).Patch(viper.GetString("DB_BASE_URL") + "/rest/v1/users?id=eq." + fmt.Sprintf("%d", actUser.User_ID))
+			_, err1 := db.R().SetBody(data).Patch(viper.GetString("DB_BASE_URL") + "/rest/v1/users?id=eq." + fmt.Sprintf("%d", actUser.User_ID))
 			if err1 != nil {
 				utils.WriteError(w, http.StatusInternalServerError, "Error occured updating the databse")
 				log.Printf("An error occured when updating the password for %d user", actUser.User_ID)
 				return
-			}
-			if response.StatusCode() == 200 {
-				log.Println("Bhai hogayaaaaaaaaaaaaaaa")
+			} else {
+				utils.WriteError(w, http.StatusOK, "Password Updated")
 			}
 
+			resp2, err2 := db.R().SetBody(map[string]interface{}{
+				"used": true,
+			}).Patch(viper.GetString("DB_BASE_URL") + "/rest/v1/password_reset_tokens?reset_token=eq." + token)
+
+			if err2 != nil {
+				utils.WriteError(w, http.StatusInternalServerError, "Error occured updating the used databse")
+				log.Printf("An error occured when updating the password for boolean updation")
+				return
+			}
+
+			fmt.Println(resp2.StatusCode())
+
+		} else {
+			utils.WriteError(w, http.StatusBadRequest, "The token is used !")
+			return
 		}
 		//Else continue with updating the password from the user
 
