@@ -97,7 +97,6 @@ func HandlePassUpdate(w http.ResponseWriter, r *http.Request) {
 			utils.WriteError(w, http.StatusBadRequest, "The token is used !")
 			return
 		}
-		//Else continue with updating the password from the user
 
 	}
 }
