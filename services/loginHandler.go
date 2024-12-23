@@ -54,12 +54,12 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	matches := utils.CheckHashPass(user.Password, actUser.Password)
 
 	if matches {
-		token, err1 := GenerateToken(actUser.User_ID, actUser.Email)
+		token, err1 := GenerateToken(actUser.User_ID, actUser.Email, actUser.UserType)
 		if err1 != nil {
 			utils.WriteError(w, http.StatusInternalServerError, "An error occured during token generation")
 			return
 		}
-		refreshToken, err2 := GenerateRefreshToken(actUser.User_ID, actUser.Email)
+		refreshToken, err2 := GenerateRefreshToken(actUser.User_ID, actUser.Email, actUser.UserType)
 		if err2 != nil {
 			utils.WriteError(w, http.StatusInternalServerError, "An error occured during refresh token generation")
 			return

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,11 +13,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-func GenerateToken(user_id int, user_email string) (string, error) {
+func GenerateToken(user_id int, user_email string, role string) (string, error) {
 	secret_key := viper.GetString("SECRET_KEY")
 	claims := &models.Claims{
-		User_ID: user_id,
-		Email:   user_email,
+		User_ID:  user_id,
+		Email:    user_email,
+		UserType: role,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(24 * time.Minute).Unix(),
 			IssuedAt:  time.Now().Unix(),
@@ -25,11 +27,12 @@ func GenerateToken(user_id int, user_email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(secret_key))
 }
-func GenerateRefreshToken(user_id int, user_email string) (string, error) {
+func GenerateRefreshToken(user_id int, user_email string, role string) (string, error) {
 	secret_key := viper.GetString("SECRET_KEY")
 	claims := &models.Claims{
-		User_ID: user_id,
-		Email:   user_email,
+		User_ID:  user_id,
+		Email:    user_email,
+		UserType: role,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
 			IssuedAt:  time.Now().Unix(),
@@ -63,11 +66,14 @@ func VerifyJWT(next http.HandlerFunc) http.HandlerFunc {
 
 		// IF the token has been expired
 		fmt.Println(claims.ExpiresAt)
+		fmt.Println(time.Now().Unix())
+
 		if time.Now().Unix() > claims.ExpiresAt {
 			utils.WriteError(w, http.StatusUnauthorized, "Token has expired")
 			return
 		}
-
+		// Setting the claims in the request context
+		r = r.WithContext(context.WithValue(r.Context(), "claims", claims))
 		next(w, r)
 	}
 }
@@ -95,7 +101,7 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate a new access token (and refresh token if needed)
-	newAccessToken, err := GenerateToken(claims.User_ID, claims.Email)
+	newAccessToken, err := GenerateToken(claims.User_ID, claims.Email, claims.UserType)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, "Error generating new access token")
 		return

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/Nyxoy/restAPI/admin"
 	"github.com/gorilla/mux"
 )
 
@@ -22,4 +23,5 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 
 func (h *Handler) RegisterProtectedRoutes(r *mux.Router) {
 	r.HandleFunc("/products", VerifyJWT(FetchProducts)).Methods("GET")
+	r.HandleFunc("/admin", VerifyJWT(admin.AdminHandler)).Methods("POST")
 }

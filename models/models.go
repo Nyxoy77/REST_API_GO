@@ -16,6 +16,7 @@ type User struct {
 	UserType  string    `json:"user_type" validate:"required,oneof=ADMIN USER"`
 	UpdatedAt string    `json:"updated_at"`
 	User_ID   int       `json:"id"`
+	// Role      string    `json:"role" validate:"required,oneof=ADMIN USER"`
 }
 
 type Login struct {
@@ -50,7 +51,9 @@ type Product struct {
 }
 
 type Claims struct {
-	User_ID int    `json:"user_id"`
-	Email   string `json:"email"`
+	User_ID  int    `json:"user_id"`
+	Email    string `json:"email"`
+	UserType string `json:"user_type" validate:"required,oneof=ADMIN USER"`
+
 	jwt.StandardClaims
 }
