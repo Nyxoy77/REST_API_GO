@@ -9,7 +9,10 @@ tmp_dir = "tmp"
   include_ext = ["go", "tpl", "tmpl", "html"]
   exclude_regex = ["_test.go"]
   stop_on_error = true
-  kill = true  # Ensure old processes are killed when reloading
+  kill_on_exit = true
+  pre = "powershell -Command \"Get-NetTCPConnection -LocalPort 8081 -State Listen | ForEach-Object {Stop-Process -Id $_.OwningProcess -Force}\""
+
+
 
 [color]
   app = ""

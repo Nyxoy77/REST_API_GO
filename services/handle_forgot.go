@@ -11,12 +11,25 @@ import (
 	"github.com/Nyxoy/restAPI/models"
 	"github.com/Nyxoy/restAPI/resetpassword"
 	"github.com/Nyxoy/restAPI/utils"
+	"github.com/go-playground/validator"
 	"github.com/spf13/viper"
 )
 
 func HandleForgot(w http.ResponseWriter, r *http.Request) {
 	var fuser models.Forgot
 	var users []models.User
+	// Validating
+	validate := utils.NewValidator()
+	if err := validate.Struct(fuser); err != nil {
+		//Gather the error data
+		errors := err.(validator.ValidationErrors)
+		for _, value := range errors {
+			log.Printf("Validation failed for field %s , conditon %s /n", value.Field(), value.Tag())
+		}
+		utils.WriteError(w, http.StatusBadRequest, "Invalid Input Fields")
+		return
+	}
+
 	if err := json.NewDecoder(r.Body).Decode(&fuser); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid body")
 		return

@@ -10,6 +10,7 @@ import (
 	"github.com/Nyxoy/restAPI/db"
 	"github.com/Nyxoy/restAPI/models"
 	"github.com/Nyxoy/restAPI/utils"
+	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 )
@@ -18,7 +19,17 @@ func HandlePassUpdate(w http.ResponseWriter, r *http.Request) {
 	var params = mux.Vars(r)
 	var token = params["token"]
 	var passBody models.UpdatePass
-
+	// Validating
+	validate := utils.NewValidator()
+	if err := validate.Struct(passBody); err != nil {
+		//Gather the error data
+		errors := err.(validator.ValidationErrors)
+		for _, value := range errors {
+			log.Printf("Validation failed for field %s , conditon %s /n", value.Field(), value.Tag())
+		}
+		utils.WriteError(w, http.StatusBadRequest, "Invalid Input Fields")
+		return
+	}
 	if err0 := json.NewDecoder(r.Body).Decode(&passBody); err0 != nil {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid body")
 		log.Println("Invalid body")

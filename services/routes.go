@@ -16,6 +16,7 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/register", HandleRegister).Methods("POST")
 	r.HandleFunc("/forgot", HandleForgot).Methods("POST")
 	r.HandleFunc("/update_pass/{token}", HandlePassUpdate)
+	r.HandleFunc("/refresh", RefreshTokenHandler)
 
 }
 

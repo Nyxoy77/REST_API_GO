@@ -29,6 +29,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid Input Fields")
 		return
 	}
+
 	db := db.CreateRestyClient()
 	resp, err := db.R().SetQueryParam("email", "eq."+user.Email).Get(viper.GetString("DB_BASE_URL") + "/rest/v1/users")
 	if err != nil {
@@ -53,16 +54,22 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	matches := utils.CheckHashPass(user.Password, actUser.Password)
 
 	if matches {
-		token, err := GenerateToken(actUser)
-		if err != nil {
+		token, err1 := GenerateToken(actUser.User_ID, actUser.Email)
+		if err1 != nil {
 			utils.WriteError(w, http.StatusInternalServerError, "An error occured during token generation")
 			return
 		}
+		refreshToken, err2 := GenerateRefreshToken(actUser.User_ID, actUser.Email)
+		if err2 != nil {
+			utils.WriteError(w, http.StatusInternalServerError, "An error occured during refresh token generation")
+			return
+		}
 		data := map[string]interface{}{
-			"message": "The user is successfully logged in",
-			"email":   actUser.Email,
-			"status":  http.StatusOK,
-			"token":   token,
+			"message":       "The user is successfully logged in",
+			"email":         actUser.Email,
+			"status":        http.StatusOK,
+			"token":         token,
+			"refresh_token": refreshToken,
 		}
 		json.NewEncoder(w).Encode(data)
 		// utils.WriteError(w, http.StatusFound, "The user successfully logged in")
