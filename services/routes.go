@@ -23,5 +23,13 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 
 func (h *Handler) RegisterProtectedRoutes(r *mux.Router) {
 	r.HandleFunc("/products", VerifyJWT(FetchProducts)).Methods("GET")
-	r.HandleFunc("/admin", VerifyJWT(admin.AdminHandler)).Methods("POST")
+}
+
+func (h *Handler) RegisterAdminRoutes(r *mux.Router) {
+	r.HandleFunc("/get_all_users", VerifyJWT(admin.AdminHandler(admin.GetAllUsers))).Methods("GET")
+	r.HandleFunc("/get_admins", VerifyJWT(admin.AdminHandler(admin.GetAllAdmins))).Methods("GET")
+	r.HandleFunc("/get_customers", VerifyJWT(admin.AdminHandler(admin.GetallCustomers))).Methods("GET")
+	r.HandleFunc("/add_product", VerifyJWT(admin.AdminHandler(admin.AddProduct))).Methods("POST")
+	r.HandleFunc("/remove_product", VerifyJWT(admin.AdminHandler(admin.RemoveProduct))).Methods("DELETE")
+
 }

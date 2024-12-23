@@ -24,7 +24,9 @@ func (s *APIServer) Run() error {
 	userHandler := services.NewHandler()
 	userHandler.RegisterRoutes(subrouter)
 	protectedSubRouter := router.PathPrefix("/api/v1/protected").Subrouter()
+	adminSubRouter := router.PathPrefix("/api/v1/protected/admin").Subrouter()
 	userHandler.RegisterProtectedRoutes(protectedSubRouter)
+	userHandler.RegisterAdminRoutes(adminSubRouter)
 	log.Println("Listening on ", s.addr)
 	return http.ListenAndServe(s.addr, router)
 }

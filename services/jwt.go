@@ -63,15 +63,13 @@ func VerifyJWT(next http.HandlerFunc) http.HandlerFunc {
 			utils.WriteError(w, http.StatusUnauthorized, "Invalid Token")
 			return
 		}
-
-		// IF the token has been expired
-		fmt.Println(claims.ExpiresAt)
-		fmt.Println(time.Now().Unix())
-
 		if time.Now().Unix() > claims.ExpiresAt {
 			utils.WriteError(w, http.StatusUnauthorized, "Token has expired")
 			return
 		}
+
+		// IF the token has been expired
+		// Automatically hojata hai check jwt.ParseWithClaims se
 		// Setting the claims in the request context
 		r = r.WithContext(context.WithValue(r.Context(), "claims", claims))
 		next(w, r)

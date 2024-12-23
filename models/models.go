@@ -40,14 +40,13 @@ type UpdatePass struct {
 }
 
 type Product struct {
-	ProductID    int     `json:"id" validate:"required,min=1"`
-	Name         string  `json:"name" validate:"required,min=3,max=100"`
-	Price        float64 `json:"price" validate:"required,gt=0"`
-	Description  string  `json:"description" validate:"required,max=500"`
-	Stock        int     `json:"stock" validate:"required,min=0"`
-	Status       string  `json:"status" validate:"required,oneof=active inactive discontinued"` // Product status (must be one of the allowed values)
-	Manufacturer string  `json:"manufacturer" validate:"max=100"`
-	ImageURL     string  `json:"image_url" validate:"url"`
+	Name          string  `json:"name" validate:"required,min=3,max=100"`                        // Name of the product
+	Description   string  `json:"description" validate:"required,max=500"`                       // Description of the product
+	Price         float64 `json:"price" validate:"required,gt=0"`                                // Price of the product
+	StockQuantity int     `json:"stock_quantity" validate:"required,min=0"`                      // Quantity in stock
+	Status        string  `json:"status" validate:"required,oneof=active inactive discontinued"` // Product status
+	Manufacturer  string  `json:"manufacturer" validate:"max=100"`                               // Manufacturer of the product
+	ImageURL      string  `json:"image_url" validate:"url"`                                      // Image URL of the product
 }
 
 type Claims struct {
