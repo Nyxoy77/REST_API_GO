@@ -16,5 +16,4 @@ func main() {
 	if error := server.Run(); error != nil {
 		log.Fatalf("An error occured at the time of  initialisation %s", error)
 	}
-
 }

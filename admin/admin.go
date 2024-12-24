@@ -24,6 +24,16 @@ func AdminHandler(next http.HandlerFunc) http.HandlerFunc {
 		next(w, r)
 	}
 }
+func UserHandler(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		mp := r.Context().Value("claims").(*models.Claims)
+		if mp.UserType != "USER" {
+			utils.WriteError(w, http.StatusUnauthorized, "Not a user")
+			return
+		}
+		next(w, r)
+	}
+}
 
 // This function will only admins and will give complete control over the users
 

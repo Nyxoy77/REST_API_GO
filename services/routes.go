@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/Nyxoy/restAPI/admin"
+	"github.com/Nyxoy/restAPI/user_customer"
 	"github.com/gorilla/mux"
 )
 
@@ -32,5 +33,10 @@ func (h *Handler) RegisterAdminRoutes(r *mux.Router) {
 	r.HandleFunc("/add_product", VerifyJWT(admin.AdminHandler(admin.AddProduct))).Methods("POST")
 	r.HandleFunc("/remove_product", VerifyJWT(admin.AdminHandler(admin.RemoveProduct))).Methods("DELETE")
 	r.HandleFunc("/update_price", VerifyJWT(admin.AdminHandler(admin.UpdatePrice))).Methods("PUT")
+}
+
+func (h *Handler) RegisterUserRoutes(r *mux.Router) {
+	r.HandleFunc("/add_to_cart", VerifyJWT(admin.UserHandler(user_customer.AddItem))).Methods("POST")
+	r.HandleFunc("/remove_item", VerifyJWT(admin.UserHandler(user_customer.RemoveItem))).Methods("DELETE")
 
 }
