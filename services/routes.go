@@ -31,5 +31,6 @@ func (h *Handler) RegisterAdminRoutes(r *mux.Router) {
 	r.HandleFunc("/get_customers", VerifyJWT(admin.AdminHandler(admin.GetallCustomers))).Methods("GET")
 	r.HandleFunc("/add_product", VerifyJWT(admin.AdminHandler(admin.AddProduct))).Methods("POST")
 	r.HandleFunc("/remove_product", VerifyJWT(admin.AdminHandler(admin.RemoveProduct))).Methods("DELETE")
+	r.HandleFunc("/update_price", VerifyJWT(admin.AdminHandler(admin.UpdatePrice))).Methods("PUT")
 
 }

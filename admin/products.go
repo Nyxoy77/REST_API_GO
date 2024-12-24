@@ -70,3 +70,44 @@ func RemoveProduct(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusOK, "Deleted the product ")
 	}
 }
+
+func UpdatePrice(w http.ResponseWriter, r *http.Request) {
+	type Price struct {
+		Id           int `json:"id" validate:"required"`
+		UpdatedPrice int `json:"price" validate:"required,min=1"`
+	}
+	var price Price
+	if err := json.NewDecoder(r.Body).Decode(&price); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, "Invalid body")
+		return
+	}
+	// Check if it exists withing the database
+	res, er := db.CreateRestyClient().R().SetQueryParam("select", "count").Get(viper.GetString("DB_BASE_URL") + "/rest/v1/products?id=eq." + fmt.Sprintf("%d", price.Id))
+	if er != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Database Query Error")
+		return
+	}
+	if res.StatusCode() == 200 {
+		var prod []struct {
+			Count int `json:"count"`
+		}
+		if err := json.Unmarshal(res.Body(), &prod); err != nil {
+			utils.WriteError(w, http.StatusBadRequest, "Error parsing the data")
+			return
+		}
+		if len(prod) == 0 || prod[0].Count == 0 {
+			utils.WriteError(w, http.StatusNotFound, "Product does not exist")
+			return
+		}
+	}
+
+	resp, err := db.CreateRestyClient().R().SetBody(price).Patch(viper.GetString("DB_BASE_URL") + "/rest/v1/products?id=eq." + fmt.Sprintf("%d", price.Id))
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Database query error")
+		return
+	}
+
+	if resp.StatusCode() == 204 {
+		utils.WriteError(w, http.StatusOK, "Price Updated Successfully")
+	}
+}
