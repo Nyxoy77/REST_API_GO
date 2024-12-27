@@ -1,7 +1,13 @@
 package user_customer
 
-type Item struct {
-	Id             int     `json:"id"`
+type ItemToBeAdded struct {
+	User_Id    int `json:"user_id" validate:"required"`
+	Product_Id int `json:"product_id" validate:"required"`
+	Quantity   int `json:"quantity" validate:"required"`
+}
+
+type CartItem struct {
+	Id             int     `json:"id,omitempty"`
 	User_Id        int     `json:"user_id" validate:"required"`
 	Product_Id     int     `json:"product_id" validate:"required"`
 	Quantity       int     `json:"quantity" validate:"required,min=1,max=7"`

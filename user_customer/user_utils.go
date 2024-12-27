@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/Nyxoy/restAPI/db"
+	"github.com/Nyxoy/restAPI/models"
 	"github.com/Nyxoy/restAPI/utils"
 	"github.com/go-playground/validator"
 	"github.com/spf13/viper"
@@ -16,8 +17,8 @@ var validate = utils.NewValidator()
 
 func AddItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var item Item
-
+	var item ItemToBeAdded
+	var checkItem []models.Product
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, "Error decoding")
 		return
@@ -32,20 +33,61 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	response, err1 := db.CreateRestyClient().R().SetQueryParam("id", fmt.Sprintf("eq.%d", item.Product_Id)).
+		Get(viper.GetString("DB_BASE_URL") + "/rest/v1/products")
+	if err1 != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Internal Server errror")
+		return
+	}
+	fmt.Println(string(response.Body()))
+	fmt.Println(response.StatusCode())
+	if response.StatusCode() == 200 {
+		if err := json.Unmarshal(response.Body(), &checkItem); err != nil {
+			utils.WriteError(w, http.StatusBadRequest, "Invalid data body")
+			return
+		}
+		if len(checkItem) > 0 {
+			if item.Quantity > checkItem[0].StockQuantity {
+				utils.WriteError(w, http.StatusBadRequest, "Not enough stock")
+				return
+			}
+		}
+
+	}
+
+	var cartItem = CartItem{
+
+		User_Id:        item.User_Id,
+		Product_Id:     item.Product_Id,
+		Quantity:       item.Quantity,
+		Price_Per_Unit: checkItem[0].Price,
+	}
 	resp, err := db.CreateRestyClient().R().
-		SetBody(item).
+		SetBody(cartItem).
 		Post(viper.GetString("DB_BASE_URL") + "/rest/v1/cart")
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, "Error accessing the database")
 		fmt.Println(err)
 		return
 	}
-
+	fmt.Println(string(resp.Body()))
 	if resp.StatusCode() == 201 {
 		utils.WriteError(w, http.StatusOK, "Item added to the cart")
 	}
 
+	// Now update the products table
+
+	res, err2 := db.CreateRestyClient().R().SetBody(map[string]interface{}{
+		"stock_quantity": checkItem[0].StockQuantity - item.Quantity,
+	}).Patch(viper.GetString("DB_BASE_URL") + fmt.Sprintf("/rest/v1/products?id=eq.%d", item.Product_Id))
+	if err2 != nil {
+		utils.WriteError(w, http.StatusInternalServerError, "Internal Server error")
+		return
+	}
+	fmt.Println(string(res.Body()))
+	fmt.Println(resp.StatusCode())
 }
+
 func RemoveItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var item DeleteItem
@@ -62,7 +104,7 @@ func RemoveItem(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid Input Fields")
 		return
 	}
-	var existItem []Item
+	var existItem []CartItem
 	resp, err := db.CreateRestyClient().R().
 		SetQueryParam("user_id", fmt.Sprintf("eq.%d", item.User_Id)).
 		SetQueryParam("product_id", fmt.Sprintf("eq.%d", item.Product_Id)).

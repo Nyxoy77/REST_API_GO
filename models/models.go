@@ -25,7 +25,7 @@ type Login struct {
 }
 
 type Forgot struct {
-	Email string `json:"email" validate:"email,required"`
+	Email string `json:"email"`
 }
 
 type Reset struct {
@@ -36,7 +36,7 @@ type Reset struct {
 }
 
 type UpdatePass struct {
-	Password string `json:"password" validate:"required,min=6"`
+	Password string `json:"password"`
 }
 
 type Product struct {
