@@ -45,7 +45,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if len(respUser) == 0 {
-		utils.WriteError(w, http.StatusNotFound, "User not found please register")
+		utils.WriteError(w, http.StatusUnauthorized, "User not found please register")
 		return
 	}
 
@@ -74,7 +74,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(data)
 		// utils.WriteError(w, http.StatusFound, "The user successfully logged in")
 	} else {
-		utils.WriteError(w, http.StatusFound, "Invalid Password")
+		utils.WriteError(w, http.StatusUnauthorized, "Invalid username or password")
 		return
 	}
 }

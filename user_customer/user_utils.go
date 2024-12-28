@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/Nyxoy/restAPI/caching"
 	"github.com/Nyxoy/restAPI/db"
 	"github.com/Nyxoy/restAPI/models"
 	"github.com/Nyxoy/restAPI/utils"
@@ -54,7 +56,6 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-
 	var cartItem = CartItem{
 
 		User_Id:        item.User_Id,
@@ -84,8 +85,9 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, "Internal Server error")
 		return
 	}
-	fmt.Println(string(res.Body()))
-	fmt.Println(resp.StatusCode())
+	if res.StatusCode() == 201 {
+		utils.WriteError(w, http.StatusOK, "Product quantity updated ")
+	}
 }
 
 func RemoveItem(w http.ResponseWriter, r *http.Request) {
@@ -170,4 +172,34 @@ func RemoveItem(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+func GetPrice(Id int) float64 {
+	// var price float64
+	var price []struct {
+		Price float64 `json:"price"`
+	}
+
+	if err := caching.GetCache(fmt.Sprintf("product:%d", Id), &price); err == nil {
+		log.Println("The cache hit ")
+		// fmt.Println(err)
+		return price[0].Price
+	}
+	resp, err := db.CreateRestyClient().R().SetQueryParam("id", fmt.Sprintf("eq.%d", Id)).
+		SetQueryParam("select", "price").
+		Get(viper.GetString("DB_BASE_URL") + "/rest/v1/products")
+	if err != nil {
+		log.Println("Error fetching the price from the database")
+		fmt.Println(err)
+		return -1
+	}
+
+	if resp.StatusCode() == 200 {
+		json.Unmarshal(resp.Body(), &price)
+		caching.SetCache(fmt.Sprintf("product:%d", Id), price, time.Duration(time.Hour))
+		return price[0].Price
+
+	}
+	return -1
+	// price = strconv.At(string(resp.Body()))
 }

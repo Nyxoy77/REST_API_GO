@@ -38,5 +38,6 @@ func (h *Handler) RegisterAdminRoutes(r *mux.Router) {
 func (h *Handler) RegisterUserRoutes(r *mux.Router) {
 	r.HandleFunc("/add_to_cart", VerifyJWT(admin.UserHandler(user_customer.AddItem))).Methods("POST")
 	r.HandleFunc("/remove_item", VerifyJWT(admin.UserHandler(user_customer.RemoveItem))).Methods("DELETE")
+	r.HandleFunc("/order", VerifyJWT(admin.UserHandler(user_customer.AddToOrders))).Methods("POST")
 
 }
