@@ -86,7 +86,7 @@ func GetAllAdmins(w http.ResponseWriter, r *http.Request) {
 		} else {
 			for _, value := range users {
 				encoder := json.NewEncoder(w)
-				encoder.SetIndent("", "\n") // Use 4 spaces for indentation (or adjust as needed)
+				encoder.SetIndent("", "\n")
 				encoder.Encode(value)
 			}
 		}
@@ -114,7 +114,7 @@ func GetallCustomers(w http.ResponseWriter, r *http.Request) {
 		} else {
 			for _, value := range users {
 				encoder := json.NewEncoder(w)
-				encoder.SetIndent("", "\n") // Use 4 spaces for indentation (or adjust as needed)
+				encoder.SetIndent("", "\n")
 				encoder.Encode(value)
 			}
 		}

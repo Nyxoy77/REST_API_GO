@@ -20,7 +20,6 @@ func AddToOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate the struct fields (if needed)
 	if err := validate.Struct(comb); err != nil {
 		errors := err.(validator.ValidationErrors)
 		for _, value := range errors {
@@ -57,7 +56,7 @@ func AddToOrders(w http.ResponseWriter, r *http.Request) {
 
 	// Add the order to the database
 	resp1, err1 := db.CreateRestyClient().R().
-		SetBody(order). // Ensure this returns the inserted order's id // Make sure the API key is correct
+		SetBody(order).
 		Post(viper.GetString("DB_BASE_URL") + "/rest/v1/orders")
 
 	if err1 != nil {
@@ -72,7 +71,7 @@ func AddToOrders(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp3, err3 := db.CreateRestyClient().R().
-		SetQueryParam("select", "id"). // Ensure this returns the inserted order's id // Make sure the API key is correct
+		SetQueryParam("select", "id").
 		Get(viper.GetString("DB_BASE_URL") + "/rest/v1/orders")
 	// fmt.Println("Response from Orders Table:", string(resp3.Body()))
 
@@ -95,9 +94,9 @@ func AddToOrders(w http.ResponseWriter, r *http.Request) {
 
 	// Insert the order items
 	for _, val := range OrderItem {
-		val.Order_Id = orderId                                  // Ensure that the order_id is set correctly
-		resp2, err2 := db.CreateRestyClient().R().SetBody(val). // Use the API key for authorization
-									Post(viper.GetString("DB_BASE_URL") + "/rest/v1/order_items")
+		val.Order_Id = orderId
+		resp2, err2 := db.CreateRestyClient().R().SetBody(val).
+			Post(viper.GetString("DB_BASE_URL") + "/rest/v1/order_items")
 
 		if err2 != nil {
 			utils.WriteError(w, http.StatusInternalServerError, "Error storing the order items detailed information")
@@ -112,6 +111,5 @@ func AddToOrders(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Inserted Order Item:", string(resp2.Body()))
 	}
 
-	// Respond back indicating success
 	utils.WriteError(w, http.StatusOK, "Order and items added successfully")
 }

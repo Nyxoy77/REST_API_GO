@@ -19,7 +19,6 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/forgot", HandleForgot).Methods("POST")
 	r.HandleFunc("/update_pass/{token}", HandlePassUpdate)
 	r.HandleFunc("/refresh", RefreshTokenHandler)
-
 }
 
 func (h *Handler) RegisterProtectedRoutes(r *mux.Router) {
