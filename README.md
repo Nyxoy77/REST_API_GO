@@ -1,4 +1,3 @@
-```markdown
 # E-Commerce REST API
 
 **E-Commerce REST API** provides a backend system for managing users, products, and orders using **Go (Golang)**.
@@ -33,6 +32,13 @@ Includes:
 - **Database** (PostgreSQL/MongoDB)
 - **Git**
 
+### Steps
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Nyxoy77/REST_API_GO.git
+   cd REST_API_GO
+   
 ### Steps
 
 1. Clone the repository:
