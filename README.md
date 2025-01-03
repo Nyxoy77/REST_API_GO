@@ -1,37 +1,35 @@
+Here is the updated and compact README file, including all the routes explicitly defined:
+
 ```markdown
 # E-Commerce REST API
 
-Welcome to the **E-Commerce REST API**! This project provides a robust backend system for managing an e-commerce platform, including user management, product management, and order processing. The API is built with **Go (Golang)** for high performance and scalability.
+**E-Commerce REST API** provides a backend system for managing users, products, and orders using **Go (Golang)**.
 
 ---
 
-## 🌟 **API Documentation**
+## API Documentation
+👉 [API Documentation](https://nyxoy77.github.io/REST_API_GO/)
 
-Explore the complete API documentation for all endpoints and usage details:
-
-👉 [**View the API Documentation Here**](https://nyxoy77.github.io/REST_API_GO/)
-
-The documentation includes:
-- A detailed list of all API endpoints.
-- Request and response examples.
-- Error handling guidelines.
-- Authentication and authorization requirements.
+Includes:
+- API endpoints
+- Request/response examples
+- Authentication requirements
 
 ---
 
 ## Features
-- **User Authentication**: Secure user registration, login, and JWT-based authentication.
-- **Product Management**: Add, update, delete, and fetch product details.
-- **Order Management**: Place, update, and track orders.
-- **Admin Panel**: Manage users, products, and orders with admin privileges.
-- **RESTful Endpoints**: Well-structured API following REST principles.
+- Secure user authentication with JWT
+- CRUD operations for products and orders
+- Admin privileges for management
+- RESTful design principles
 
-## Installation and Setup
+---
 
+## Installation
 ### Prerequisites
-- **Go** (version 1.19 or later)
-- A database system (e.g., PostgreSQL or MongoDB)
-- **Git** for version control
+- Go (1.19+)
+- Database (PostgreSQL/MongoDB)
+- Git
 
 ### Steps
 1. Clone the repository:
@@ -39,96 +37,90 @@ The documentation includes:
    git clone https://github.com/Nyxoy77/REST_API_GO.git
    cd REST_API_GO
    ```
-
 2. Install dependencies:
    ```bash
    go mod tidy
    ```
-
-3. Configure environment variables:
-   - Create a `.env` file in the root directory.
-   - Add the following variables:
-     ```env
-     DB_HOST=localhost
-     DB_PORT=5432
-     DB_USER=yourusername
-     DB_PASSWORD=yourpassword
-     DB_NAME=ecommerce
-     JWT_SECRET=your_jwt_secret
-     ```
-
-4. Run database migrations (if applicable).
-
-5. Start the server:
+3. Configure `.env`:
+   ```env
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USER=username
+   DB_PASSWORD=password
+   DB_NAME=ecommerce
+   JWT_SECRET=your_jwt_secret
+   ```
+4. Start the server:
    ```bash
    go run main.go
    ```
-
-6. Access the API at `http://localhost:8080`.
+5. API available at `http://localhost:8080`.
 
 ---
 
-## API Endpoints (Overview)
+## API Endpoints
+
+### Public Routes
+- `POST /login` - User login
+- `POST /register` - User registration
+- `POST /forgot` - Request password reset
+- `PUT /update_pass/{token}` - Update password using token
+- `POST /refresh` - Refresh JWT token
+
+### Protected Routes (Authenticated)
+- `GET /products` - Fetch all products
+
+### Admin Routes
+- `GET /get_all_users` - Fetch all users
+- `GET /get_admins` - Fetch all admins
+- `GET /get_customers` - Fetch all customers
+- `POST /add_product` - Add a new product
+- `DELETE /remove_product` - Remove a product
+- `PUT /update_price` - Update product price
 
 ### User Routes
-- `POST /api/v1/register` - Register a new user.
-- `POST /api/v1/login` - Authenticate and retrieve a JWT token.
-- `GET /api/v1/user/:id` - Fetch user details (requires authentication).
-
-### Product Routes
-- `POST /api/v1/products` - Add a new product (Admin only).
-- `GET /api/v1/products` - Fetch all products.
-- `GET /api/v1/products/:id` - Fetch details of a single product.
-- `PUT /api/v1/products/:id` - Update a product (Admin only).
-- `DELETE /api/v1/products/:id` - Delete a product (Admin only).
-
-### Order Routes
-- `POST /api/v1/orders` - Place a new order.
-- `GET /api/v1/orders/:id` - Fetch order details.
-- `PUT /api/v1/orders/:id` - Update order status (Admin only).
-
-For detailed examples and payload structures, check the [API Documentation](https://nyxoy77.github.io/REST_API_GO/).
+- `POST /add_to_cart` - Add item to cart
+- `DELETE /remove_item` - Remove item from cart
+- `POST /order` - Place an order
 
 ---
 
 ## Tech Stack
-- **Programming Language**: Go (Golang)
-- **Database**: PostgreSQL or MongoDB (configurable)
-- **Authentication**: JWT-based secure authentication
-- **API Framework**: `net/http` with middleware for routing and authentication
+- **Language**: Go (Golang)
+- **Database**: PostgreSQL/MongoDB/Supabase
+- **Authentication**: JWT
+- **Framework**: `gorilla/mux`
 
 ---
 
 ## Testing
-- Run unit tests using:
-  ```bash
-  go test ./...
-  ```
+Run tests:
+```bash
+go test ./...
+```
 
 ---
 
 ## Deployment
-- Use Docker to containerize and deploy the application.
-- Example Docker commands:
-  ```bash
-  docker build -t ecommerce-api .
-  docker run -p 8080:8080 ecommerce-api
-  ```
+Use Docker:
+```bash
+docker build -t ecommerce-api .
+docker run -p 8080:8080 ecommerce-api
+```
 
 ---
 
 ## Contributing
-We welcome contributions! Follow these steps:
 1. Fork the repository.
 2. Create a feature branch:
    ```bash
    git checkout -b feature/your-feature
    ```
-3. Commit your changes:
+3. Commit changes:
    ```bash
-   git commit -m "Add your message here"
+   git commit -m "Your message"
    ```
-4. Push to the branch:
+4. Push to branch:
    ```bash
    git push origin feature/your-feature
    ```
@@ -137,15 +129,11 @@ We welcome contributions! Follow these steps:
 ---
 
 ## License
-This project is licensed under the [MIT License](LICENSE).
+Licensed under the [MIT License](LICENSE).
 
 ---
 
 ## Contact
-- **Author**: Shivam (GitHub: [Nyxoy77](https://github.com/Nyxoy77))
-- **API Documentation**: [**View Here**](https://nyxoy77.github.io/REST_API_GO/)
-
----
-
-Thank you for using the E-Commerce REST API! Feel free to reach out for any questions or suggestions.
+- **Author**: [Nyxoy77](https://github.com/Nyxoy77)
+- **API Documentation**: [Link](https://nyxoy77.github.io/REST_API_GO/)
 ```
