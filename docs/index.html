@@ -1,28 +1,13 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <title>API Documentation</title>
-    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@latest/swagger-ui.css">
-</head>
-
-<body>
-    <div id="swagger-ui"></div>
-    <script src="https://unpkg.com/swagger-ui-dist@latest/swagger-ui-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js"></script>
+  </head>
+  <body>
+    <div id="redoc-container"></div>
     <script>
-        window.onload = function () {
-            const ui = SwaggerUIBundle({
-                url: "openapi.yaml", 
-                dom_id: '#swagger-ui',
-                presets: [
-                    SwaggerUIBundle.presets.apis,
-                    SwaggerUIStandalonePreset
-                ],
-                layout: "StandaloneLayout"
-            });
-            window.ui = ui;
-        };
+      Redoc.init('openapi.yaml', {}, document.getElementById('redoc-container'));
     </script>
-</body>
-
+  </body>
 </html>

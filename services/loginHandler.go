@@ -1,10 +1,12 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/Nyxoy/restAPI/db"
 	"github.com/Nyxoy/restAPI/models"
@@ -16,6 +18,7 @@ import (
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var user models.Login
+
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		return
 	}
@@ -29,18 +32,21 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid Input Fields")
 		return
 	}
-
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
 	db := db.CreateRestyClient()
-	resp, err := db.R().SetQueryParam("email", "eq."+user.Email).Get(viper.GetString("DB_BASE_URL") + "/rest/v1/users")
+	resp, err := db.R().SetContext(ctx).
+		SetQueryParam("email", "eq."+user.Email).
+		Get(viper.GetString("DB_BASE_URL") + "/rest/v1/users")
 	if err != nil {
-		log.Printf("An error occured at the time of logging %s", err)
+		log.Printf("An error occured at the time of logging %v", err)
 		http.Error(w, fmt.Sprintf("An error occurred at the time of logging: %s", err), http.StatusInternalServerError)
 		return
 	}
 	var respUser []models.User
 	err1 := json.Unmarshal(resp.Body(), &respUser)
 	if err1 != nil {
-		log.Println("An error occured at the time of parsing the data")
+		log.Printf("An error occured at the time of parsing the data %v", err)
 		http.Error(w, "An error occured at the time of parsing the data for logging", http.StatusInternalServerError)
 		return
 	}

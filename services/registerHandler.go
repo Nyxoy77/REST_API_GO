@@ -1,9 +1,11 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/Nyxoy/restAPI/db"
 	"github.com/Nyxoy/restAPI/models"
@@ -30,7 +32,8 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	db := db.CreateRestyClient()
-	ctx := r.Context()
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
 	resp, err := db.R().
 		SetContext(ctx).
 		SetQueryParam("email", "eq."+user.Email).              // Set the query parameter for email
