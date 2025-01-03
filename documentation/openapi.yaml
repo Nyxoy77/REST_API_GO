@@ -1,0 +1,327 @@
+openapi: 3.0.0
+info:
+  title: E-Commerce API
+  description: API for user authentication, registration, password management, product management, and token handling.
+  version: 1.0.0
+  contact:
+    name: Your Name
+    email: your.email@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+paths:
+  /login:
+    post:
+      summary: User login
+      description: Authenticates a user and returns access and refresh tokens.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: The user is successfully logged in
+                  email:
+                    type: string
+                    example: user@example.com
+                  status:
+                    type: integer
+                    example: 200
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refresh_token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Invalid input fields
+        '401':
+          description: Invalid username or password
+        '500':
+          description: Internal server error
+
+  /register:
+    post:
+      summary: User registration
+      description: Registers a new user in the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: The user is registered successfully
+        '400':
+          description: Invalid request body or input fields
+        '409':
+          description: User already exists
+        '500':
+          description: Internal server error
+
+  /forgot:
+    post:
+      summary: Forgot password
+      description: Initiates a password reset process by generating a reset token and sending it via email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Forgot'
+      responses:
+        '200':
+          description: If the email is registered, a reset token will be sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: If your mail is registered, a mail will be sent on the mail id
+        '400':
+          description: Invalid input fields or request body
+        '500':
+          description: Internal server error
+
+  /update_pass/{token}:
+    post:
+      summary: Update password
+      description: Updates the user's password using a valid reset token.
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The reset token received via email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePass'
+      responses:
+        '200':
+          description: Password updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password Updated
+        '400':
+          description: Invalid token or input fields
+        '500':
+          description: Internal server error
+
+  /refresh:
+    post:
+      summary: Refresh token
+      description: Generates a new access token using a valid refresh token.
+      responses:
+        '200':
+          description: New access token generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '401':
+          description: Invalid or expired refresh token
+        '500':
+          description: Internal server error
+
+  /products:
+    post:
+      summary: Create a new product
+      description: Adds a new product to the system.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product created successfully
+        '400':
+          description: Invalid input fields
+        '401':
+          description: Unauthorized (invalid or missing token)
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        firstname:
+          type: string
+          example: John
+          minLength: 2
+          maxLength: 100
+        lastname:
+          type: string
+          example: Doe
+          minLength: 2
+          maxLength: 100
+        email:
+          type: string
+          example: user@example.com
+          format: email
+        password:
+          type: string
+          example: password123
+          minLength: 6
+        phone:
+          type: string
+          example: "+1234567890"
+          minLength: 10
+          maxLength: 10
+        user_type:
+          type: string
+          example: USER
+          enum: [ADMIN, USER]
+      required:
+        - firstname
+        - lastname
+        - email
+        - password
+        - phone
+        - user_type
+
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+          example: user@example.com
+          format: email
+        password:
+          type: string
+          example: password123
+      required:
+        - email
+        - password
+
+    Forgot:
+      type: object
+      properties:
+        email:
+          type: string
+          example: user@example.com
+      required:
+        - email
+
+    UpdatePass:
+      type: object
+      properties:
+        password:
+          type: string
+          example: newpassword123
+      required:
+        - password
+
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Smartphone
+          minLength: 3
+          maxLength: 100
+        description:
+          type: string
+          example: A high-end smartphone with advanced features.
+          maxLength: 500
+        price:
+          type: number
+          example: 699.99
+          minimum: 0
+          exclusiveMinimum: true
+        stock_quantity:
+          type: integer
+          example: 100
+          minimum: 0
+        status:
+          type: string
+          example: active
+          enum: [active, inactive, discontinued]
+        manufacturer:
+          type: string
+          example: XYZ Corp
+          maxLength: 100
+        image_url:
+          type: string
+          example: https://example.com/image.jpg
+          format: uri
+      required:
+        - name
+        - description
+        - price
+        - stock_quantity
+        - status
+
+    Claims:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          example: user@example.com
+        user_type:
+          type: string
+          example: USER
+          enum: [ADMIN, USER]
+      required:
+        - user_id
+        - email
+        - user_type
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

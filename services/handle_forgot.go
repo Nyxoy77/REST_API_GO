@@ -1,8 +1,8 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -34,9 +34,10 @@ func HandleForgot(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, "Invalid body")
 		return
 	}
-
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
 	db := db.CreateRestyClient()
-	resp, err := db.R().
+	resp, err := db.R().SetContext(ctx).
 		SetQueryParam("email", "eq."+fuser.Email). // Set the query parameter for email
 		Get(viper.GetString("DB_BASE_URL") + "/rest/v1/users")
 	if err != nil {
@@ -47,7 +48,7 @@ func HandleForgot(w http.ResponseWriter, r *http.Request) {
 	if resp.StatusCode() == 200 {
 
 		if err := json.Unmarshal(resp.Body(), &users); err != nil {
-			utils.WriteError(w, http.StatusBadRequest, "Wrong data fetched")
+			utils.WriteError(w, http.StatusBadRequest, "Unable to parse the data")
 			return
 		}
 
@@ -76,7 +77,7 @@ func HandleForgot(w http.ResponseWriter, r *http.Request) {
 			log.Printf("An error happend when registering the token for %s %s", fuser.Email, err1)
 			return
 		}
-		fmt.Println(resp1.StatusCode())
+
 		if resp1.StatusCode() == 201 {
 			// utils.WriteError(w, http.StatusOK, "If your mail is registerd a mail will be sent on the mail id")
 			mail := EmailBody{
