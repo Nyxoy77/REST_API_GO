@@ -22,6 +22,15 @@ func SetCache(key string, value interface{}, ttl time.Duration) error {
 	return RedisClient.Set(ctx, key, data, ttl).Err()
 }
 
+func BlackListToken(key string, ttl time.Duration) error {
+	if RedisClient == nil {
+		return fmt.Errorf("redis client is not initialized")
+	}
+	actKey := fmt.Sprintf("blacklist:%s", key)
+
+	return RedisClient.Set(ctx, actKey, true, ttl).Err()
+}
+
 func GetCache(key string, dest interface{}) error {
 	if RedisClient == nil {
 		return fmt.Errorf("redis client is not initialized")
@@ -45,4 +54,17 @@ func DeleteCache(key string) error {
 	}
 	log.Println("Deleted the cache successfully")
 	return nil
+}
+
+func ExistCache(key string) bool {
+	if RedisClient == nil {
+		log.Println("Redis Client is not initialized ")
+		return false
+	}
+	exists, _ := RedisClient.Exists(ctx, key).Result()
+
+	if exists > 0 {
+		return true
+	}
+	return false
 }

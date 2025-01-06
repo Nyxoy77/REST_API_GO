@@ -5,6 +5,7 @@ import (
 	authservices "github.com/Nyxoy/restAPI/services/auth_services"
 	forgotservices "github.com/Nyxoy/restAPI/services/forgot_services"
 	myjwt "github.com/Nyxoy/restAPI/services/jwt_logic"
+	logoutservice "github.com/Nyxoy/restAPI/services/logout_service"
 	productservices "github.com/Nyxoy/restAPI/services/products"
 	"github.com/Nyxoy/restAPI/user_customer"
 	"github.com/gorilla/mux"
@@ -26,6 +27,7 @@ func (h *Handler) RegisterRoutes(r *mux.Router) {
 }
 
 func (h *Handler) RegisterProtectedRoutes(r *mux.Router) {
+	r.HandleFunc("/logout", myjwt.VerifyJWT(logoutservice.LogoutHandler)).Methods("POST")
 	r.HandleFunc("/products", myjwt.VerifyJWT(productservices.FetchProducts)).Methods("GET")
 }
 

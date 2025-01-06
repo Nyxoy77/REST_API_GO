@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Nyxoy/restAPI/caching"
 	"github.com/Nyxoy/restAPI/models"
 	"github.com/Nyxoy/restAPI/utils"
 	"github.com/golang-jwt/jwt"
@@ -50,6 +51,12 @@ func VerifyJWT(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		tokenString = tokenString[len("Bearer "):]
+
+		actKey := fmt.Sprintf("blacklist:%s", tokenString)
+		if caching.ExistCache(actKey) {
+			utils.WriteError(w, http.StatusUnauthorized, "User has logged out please login again")
+			return
+		}
 		// Parse only if you want to check the signature if it matches
 		claims := &models.Claims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
