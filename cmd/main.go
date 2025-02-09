@@ -10,13 +10,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Main function
 func main() {
 	config.LoadConfig()
 	server := api.NewAPIServer(viper.GetString("SERVER_PORT"))
-	caching.InitializeRedis("localhost:6379", "", 0)
+	caching.InitializeRedis(viper.GetString("REDIS_SERVER"), "", 0)
 	fmt.Println(viper.GetString("SERVER_PORT"))
 	if error := server.Run(); error != nil {
 		log.Fatalf("An error occured at the time of  initialisation %s", error)
 	}
-	//Main function
 }

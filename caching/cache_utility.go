@@ -63,8 +63,5 @@ func ExistCache(key string) bool {
 	}
 	exists, _ := RedisClient.Exists(ctx, key).Result()
 
-	if exists > 0 {
-		return true
-	}
-	return false
+	return exists > 0
 }

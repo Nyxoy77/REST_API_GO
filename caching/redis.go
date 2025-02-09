@@ -10,18 +10,19 @@ import (
 
 var RedisClient *redis.Client
 
-func InitializeRedis(addr string, password string, db int) {
+func InitializeRedis(addr string, password string, db int) error {
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: password,
 		DB:       db,
 	})
 
-	resp, err := RedisClient.Ping(context.Background()).Result()
-	fmt.Println(resp)
+	_, err := RedisClient.Ping(context.Background()).Result()
+
 	if err != nil {
 		log.Fatalf("An error occured starting the redis server")
-		return
+		return fmt.Errorf("An error occured starting the redis server %w", err)
 	}
 	log.Println("Redis Running")
+	return nil
 }

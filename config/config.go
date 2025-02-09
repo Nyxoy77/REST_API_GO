@@ -11,8 +11,8 @@ import (
 func LoadConfig() error {
 	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
-	// viper.AddConfigPath("cmd")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath("cmd")
+	// viper.AddConfigPath(".")
 	if os.Getenv("TEST_MODE") == "true" {
 		viper.SetConfigFile("C:/Users/Shivam Rai/OneDrive/Desktop/DESKTOP/go_lco/Project/RESTAPI/cmd/.env")
 	}
