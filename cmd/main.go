@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/Nyxoy/restAPI/caching"
@@ -13,6 +14,7 @@ func main() {
 	config.LoadConfig()
 	server := api.NewAPIServer(viper.GetString("SERVER_PORT"))
 	caching.InitializeRedis("localhost:6379", "", 0)
+	fmt.Println(viper.GetString("SERVER_PORT"))
 	if error := server.Run(); error != nil {
 		log.Fatalf("An error occured at the time of  initialisation %s", error)
 	}
