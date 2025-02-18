@@ -66,14 +66,6 @@ paths:
       responses:
         '200':
           description: User registered successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: The user is registered successfully
         '400':
           description: Invalid request body or input fields
         '409':
@@ -94,14 +86,6 @@ paths:
       responses:
         '200':
           description: If the email is registered, a reset token will be sent.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: If your mail is registered, a mail will be sent on the mail id
         '400':
           description: Invalid input fields or request body
         '500':
@@ -117,7 +101,6 @@ paths:
           required: true
           schema:
             type: string
-          description: The reset token received via email
       requestBody:
         required: true
         content:
@@ -127,14 +110,6 @@ paths:
       responses:
         '200':
           description: Password updated successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Password Updated
         '400':
           description: Invalid token or input fields
         '500':
@@ -147,23 +122,79 @@ paths:
       responses:
         '200':
           description: New access token generated successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         '401':
           description: Invalid or expired refresh token
         '500':
           description: Internal server error
 
-  /products:
+  /logout:
     post:
-      summary: Create a new product
-      description: Adds a new product to the system.
+      summary: User logout
+      description: Invalidates the provided JWT token by adding it to a blacklist.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+        '400':
+          description: Token empty
+        '500':
+          description: Internal server error
+
+  /products:
+    get:
+      summary: Fetch products
+      description: Retrieves a list of products from cache or database.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Products retrieved successfully
+        '400':
+          description: Failed to fetch product data
+        '500':
+          description: Internal server error
+
+  /get_all_users:
+    get:
+      summary: Get all users
+      description: Retrieves a list of all users (admins and customers) from the database.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '500':
+          description: Error retrieving the users data
+
+  /get_admins:
+    get:
+      summary: Get all admins
+      description: Retrieves a list of all users with the ADMIN role.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Admins retrieved successfully
+        '500':
+          description: Error retrieving the admins data
+
+  /get_customers:
+    get:
+      summary: Get all customers
+      description: Retrieves a list of all users with the USER role.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Customers retrieved successfully
+        '500':
+          description: Error retrieving the customers data
+
+  /add_product:
+    post:
+      summary: Add a new product
+      description: Allows an admin to add a new product to the database.
       security:
         - BearerAuth: []
       requestBody:
@@ -174,154 +205,194 @@ paths:
               $ref: '#/components/schemas/Product'
       responses:
         '201':
-          description: Product created successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Product created successfully
+          description: Product added successfully
+        '500':
+          description: Error adding the product
+
+  /remove_product:
+    delete:
+      summary: Remove product
+      description: Removes a product from the system by its ID.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+            description: ID of the product to be removed
+      responses:
+        '200':
+          description: Product removed successfully
         '400':
-          description: Invalid input fields
-        '401':
-          description: Unauthorized (invalid or missing token)
+          description: Product ID is required
+        '404':
+          description: Product not found
         '500':
           description: Internal server error
 
+  /update_price:
+    put:
+      summary: Update product price
+      description: Updates the price of an existing product.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: ID of the product to update the price for
+                price:
+                  type: integer
+                  description: New price for the product
+      responses:
+        '200':
+          description: Price updated successfully
+        '400':
+          description: Invalid input or product not found
+        '500':
+          description: Internal server error
+
+  /add_to_cart:
+    post:
+      summary: Add item to cart
+      description: Adds a product to the user's cart.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  description: User ID of the person adding the item
+                product_id:
+                  type: integer
+                  description: ID of the product being added
+                quantity:
+                  type: integer
+                  description: Quantity of the product being added
+      responses:
+        '200':
+          description: Item added to cart successfully
+        '400':
+          description: Invalid input fields or insufficient stock
+        '500':
+          description: Internal server error
+
+  /remove_item:
+    delete:
+      summary: Remove item from cart
+      description: Removes a product from the user's cart.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  description: User ID of the person removing the item
+                product_id:
+                  type: integer
+                  description: ID of the product being removed
+                quantity:
+                  type: integer
+                  description: Quantity of the product to remove
+      responses:
+        '200':
+          description: Item removed from cart successfully
+        '400':
+          description: Invalid input fields or insufficient quantity
+        '500':
+          description: Internal server error
+
+  /order:
+    post:
+      summary: Place an order
+      description: Places an order for the products in the cart.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  description: User ID placing the order
+                product_id:
+                  type: integer
+                  description: ID of the product being ordered
+                quantity:
+                  type: integer
+                  description: Quantity of the product being ordered
+      responses:
+        '200':
+          description: Order placed successfully
+        '400':
+          description: Invalid input fields or insufficient stock
+        '500':
+          description: Internal server error
 components:
   schemas:
-    User:
-      type: object
-      properties:
-        firstname:
-          type: string
-          example: John
-          minLength: 2
-          maxLength: 100
-        lastname:
-          type: string
-          example: Doe
-          minLength: 2
-          maxLength: 100
-        email:
-          type: string
-          example: user@example.com
-          format: email
-        password:
-          type: string
-          example: password123
-          minLength: 6
-        phone:
-          type: string
-          example: "+1234567890"
-          minLength: 10
-          maxLength: 10
-        user_type:
-          type: string
-          example: USER
-          enum: [ADMIN, USER]
-      required:
-        - firstname
-        - lastname
-        - email
-        - password
-        - phone
-        - user_type
-
     Login:
       type: object
       properties:
         email:
           type: string
-          example: user@example.com
-          format: email
         password:
           type: string
-          example: password123
-      required:
-        - email
-        - password
-
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        name:
+          type: string
     Forgot:
       type: object
       properties:
         email:
           type: string
-          example: user@example.com
-      required:
-        - email
-
     UpdatePass:
       type: object
       properties:
         password:
           type: string
-          example: newpassword123
-      required:
-        - password
-
     Product:
       type: object
       properties:
         name:
           type: string
-          example: Smartphone
-          minLength: 3
-          maxLength: 100
         description:
           type: string
-          example: A high-end smartphone with advanced features.
-          maxLength: 500
         price:
-          type: number
-          example: 699.99
-          minimum: 0
-          exclusiveMinimum: true
-        stock_quantity:
           type: integer
-          example: 100
-          minimum: 0
-        status:
-          type: string
-          example: active
-          enum: [active, inactive, discontinued]
-        manufacturer:
-          type: string
-          example: XYZ Corp
-          maxLength: 100
-        image_url:
-          type: string
-          example: https://example.com/image.jpg
-          format: uri
-      required:
-        - name
-        - description
-        - price
-        - stock_quantity
-        - status
-
-    Claims:
+    CartItem:
       type: object
       properties:
         user_id:
           type: integer
-          example: 1
-        email:
-          type: string
-          example: user@example.com
-        user_type:
-          type: string
-          example: USER
-          enum: [ADMIN, USER]
-      required:
-        - user_id
-        - email
-        - user_type
-
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+        product_id:
+          type: integer
+        quantity:
+          type: integer
+        price_per_unit:
+          type: integer
