@@ -21,6 +21,7 @@ Includes:
 - **CRUD operations** for products and orders
 - Admin privileges for management
 - RESTful design principles
+- Caching Support using Redis
 
 ---
 
